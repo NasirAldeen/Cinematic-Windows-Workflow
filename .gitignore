@@ -1,0 +1,9 @@
+*.log
+*.active
+Thumbs.db
+.DS_Store
+
+# Users supply their own licensed soundtrack. Personal media is never committed.
+assets/*.mp3
+assets/*.wav
+!assets/README.md
