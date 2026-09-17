@@ -18,6 +18,7 @@ wants a dramatic—but practical—way to enter a focused workspace.
 - Places Windows Terminal on the right and VS Code on the left.
 - Starts configurable tray/background applications and keeps them minimized.
 - Opens WhatsApp and a music URL in Opera GX after the intro soundtrack ends.
+- Optionally records one genuine work session per day in a separate GitHub repo.
 - Writes a troubleshooting log without showing a launcher console.
 
 ### Chill Mode
@@ -73,6 +74,7 @@ All ordinary customization lives in [`config.psd1`](config.psd1).
 | `ToofanPath` | Executable used for terminal tab 6 |
 | `Apps` | Paths to Terminal, VS Code, tray apps, browsers, and Brave |
 | `Urls` | WhatsApp and music pages opened by Opera GX |
+| `DailyLearningLog` | Optional daily Git commit and push settings |
 | `CloseProcesses` | Process names force-closed by Chill Mode |
 
 Paths may contain environment variables such as `%USERPROFILE%`,
@@ -110,6 +112,24 @@ Do not publish audio, character voices, movie clips, or music unless you have
 the necessary redistribution rights. This repository intentionally includes no
 JARVIS, Marvel, movie, or YouTube audio.
 
+### Enabling the daily learning log
+
+The optional updater records the first real Work Mode launch of each day in a
+separate Git repository. It commits only when it adds a dated entry—there are no
+empty commits—and performs the network work in a hidden background process so
+application startup remains fast.
+
+1. Create or clone a learning-log repository containing `Daily-Work-Log.md`.
+2. Make sure `git push` works for that repository using your normal GitHub
+   authentication.
+3. Set `DailyLearningLog.Enabled` to `$true` in `config.psd1`.
+4. Set `RepositoryPath`, `RemoteName`, and `BranchName` for your repository.
+
+Check `GitHub-Update.log` after Work Mode starts. A successful entry includes
+the pushed commit ID; failures include the exact Git error without interrupting
+the rest of Work Mode. GitHub contributions also require the commit email to be
+connected to the GitHub account.
+
 ## Project structure
 
 ```text
@@ -119,6 +139,7 @@ Cinematic-Windows-Workflow/
 ├── src/
 │   ├── Chill.ps1
 │   ├── Start-Work.ps1
+│   ├── Update-DailyLearningLog.ps1
 │   └── Work-Intro.ps1
 ├── .gitignore
 ├── config.psd1
@@ -157,6 +178,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\src\Chill.ps1 -Preview
 After a real run, inspect:
 
 - `Start-Work.log`
+- `GitHub-Update.log`
 - `Work-Intro.log`
 - `Chill.log`
 
@@ -167,6 +189,8 @@ distribution name, or a CLI command that is not available in `PATH`.
 
 - No telemetry or network tracking is included.
 - No passwords, tokens, or account credentials are stored.
+- The GitHub updater is disabled by default and touches only its configured log
+  repository and file.
 - The animation can always be dismissed with `Esc`.
 - The intro and application launcher run independently, so a visual failure does
   not prevent Work Mode from attempting to start.

@@ -31,6 +31,17 @@
         Music    = 'https://www.youtube.com/'
     }
 
+    # Optional: record one real Work Mode session per day in a separate Git repo.
+    # The repository must already exist, have a remote, and be authenticated.
+    DailyLearningLog = @{
+        Enabled         = $false
+        RepositoryPath  = '%USERPROFILE%\Desktop\Daily_Learning_Log'
+        LogFileName     = 'Daily-Work-Log.md'
+        RemoteName      = 'origin'
+        BranchName      = 'main'
+        ActivityMessage = 'Started a focused work session using the Cinematic Windows Workflow.'
+    }
+
     # Chill Mode force-closes every process with these names.
     CloseProcesses = @(
         'toofan',

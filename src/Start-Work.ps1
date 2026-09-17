@@ -37,6 +37,7 @@ $OperaGxPath          = Expand-ConfiguredPath $Config.Apps.OperaGX
 $WhatsAppUrl          = $Config.Urls.WhatsApp
 $YouTubeUrl           = $Config.Urls.Music
 $CinematicMarkerPath  = Join-Path $ProjectRoot 'cinematic-intro.active'
+$DailyLearningUpdater = Join-Path $PSScriptRoot 'Update-DailyLearningLog.ps1'
 # ---------------------------------------------------------------------
 
 if ($Preview) {
@@ -44,6 +45,9 @@ if ($Preview) {
     Write-Host '  1. mimo  2. wsl  3. feynman after 10 seconds  4. claude  5. codex  6. toofan' -ForegroundColor Cyan
     Write-Host '  Terminal on the right; VS Code on the left.' -ForegroundColor Cyan
     Write-Host '  Plus Keyboard Sounds, Handy, Rovyl, and Opera GX with WhatsApp + YouTube.' -ForegroundColor Cyan
+    if ($Config.DailyLearningLog.Enabled) {
+        Write-Host '  Updates the configured daily learning-log repository in the background.' -ForegroundColor Cyan
+    }
     if ($Cinematic) { Write-Host '  Cinematic overlay enabled; Opera waits until the overlay closes.' -ForegroundColor Cyan }
     exit 0
 }
@@ -210,11 +214,33 @@ function Add-PowerShellTab {
 
 if ($Validate) {
     Write-Host 'Validation passed: PowerShell and Windows window-control code loaded successfully.' -ForegroundColor Green
+    if ($Config.DailyLearningLog.Enabled -and -not (Test-Path -LiteralPath $DailyLearningUpdater)) {
+        throw "Daily learning-log updater was not found at: $DailyLearningUpdater"
+    }
     foreach ($validationName in @('WindowsTerminal', 'Code', 'Keyboard Sounds', 'handy', 'Rovyl', 'opera')) {
         $validationHandles = @(Get-AppWindowHandles -ProcessNames @($validationName))
         Write-Host ("  {0}: {1} visible top-level window(s)" -f $validationName, $validationHandles.Count)
     }
     exit 0
+}
+
+# Keep Git network work outside the startup path. The optional updater runs in
+# a separate hidden process and writes its result to GitHub-Update.log.
+if ($Config.DailyLearningLog.Enabled) {
+    if (Test-Path -LiteralPath $DailyLearningUpdater) {
+        $updaterArguments = @(
+            '-NoProfile',
+            '-NonInteractive',
+            '-WindowStyle', 'Hidden',
+            '-ExecutionPolicy', 'Bypass',
+            '-File', ('"{0}"' -f $DailyLearningUpdater)
+        )
+        Start-Process -FilePath 'powershell.exe' -ArgumentList $updaterArguments -WindowStyle Hidden
+        Write-Host 'Started the daily learning-log update in the background.' -ForegroundColor Green
+    }
+    else {
+        Write-Warning "Daily learning-log updater was not found at: $DailyLearningUpdater"
+    }
 }
 
 # First tab creates the one terminal window. The layout helper waits only
